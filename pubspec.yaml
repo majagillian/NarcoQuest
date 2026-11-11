@@ -30,3 +30,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/sounds/
+
+# Behebt einen Versionskonflikt zwischen pdf/image und archive.
+dependency_overrides:
+  archive: ^4.6.0
+  image: ^4.12.0
