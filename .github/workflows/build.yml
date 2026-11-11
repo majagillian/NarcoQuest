@@ -1,0 +1,57 @@
+name: Android-App bauen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter-Version
+        run: flutter --version
+
+      - name: Pakete laden
+        run: flutter pub get
+
+      - name: Code prüfen
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: APK bauen
+        run: flutter build apk --release
+
+      - name: APK umbenennen
+        run: cp build/app/outputs/flutter-apk/app-release.apk NarcoQuest.apk
+
+      - name: APK als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: NarcoQuest-apk
+          path: NarcoQuest.apk
+
+      - name: Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: NarcoQuest 1.0 (Build ${{ github.run_number }})
+          make_latest: true
+          body: |
+            Automatisch gebaute Android-App.
+            **Installation:** `NarcoQuest.apk` unten herunterladen, auf dem Handy öffnen und „Aus dieser Quelle installieren“ erlauben.
+          files: NarcoQuest.apk
